@@ -20,11 +20,28 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
-		</dependency>
+			<exclusions>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
+				</exclusion>
+			</exclusions>
 
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<!-- Adding the dependency for vizualize to track the events -->
+		<dependency>
+			<groupId>dev.vizualize</groupId>
+			<artifactId>vizualize-client</artifactId>
+			<version>0.0.4</version>
+		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
+			<version>1.18.30</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -36,6 +53,50 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>aspectj-maven-plugin</artifactId>
+				<version>1.15.0</version>
+				<configuration>
+<!--					<verbose>true</verbose>-->
+<!--					<showWeaveInfo>true</showWeaveInfo>-->
+					<complianceLevel>17</complianceLevel>
+					<source>17</source>
+					<target>17</target>
+					<Xlint>ignore</Xlint>
+<!--					<outxml>true</outxml>-->
+					<forceAjcCompile>true</forceAjcCompile>
+					<!-- start: This is required to enable AspectJ post-compile weaving -->
+					<sources/>
+					<weaveDirectories>
+						<weaveDirectory>${project.build.directory}/classes</weaveDirectory>
+					</weaveDirectories>
+					<!-- end: This is required to enable AspectJ post-compile weaving -->
+					<weaveDependencies>
+						<weaveDependency>
+							<groupId>dev.vizualize</groupId>
+							<artifactId>vizualize-client</artifactId>
+						</weaveDependency>
+					</weaveDependencies>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>       <!-- use this goal to weave all your main classes -->
+							<goal>test-compile</goal>  <!-- use this goal to weave all your test classes -->
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<!-- Ensure aspectj tools version used by compiler is the same version used as dependency. Avoids warning
+                    -->
+					<dependency>
+						<groupId>org.aspectj</groupId>
+						<artifactId>aspectjtools</artifactId>
+						<version>1.9.22</version>
+					</dependency>
+				</dependencies>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
